@@ -61,10 +61,10 @@ model Admin {
 model Teacher {
   id                 String            @id @default(uuid())
   email              String            @unique
-  phoneNumber        String?
+  phoneNumber        String            @unique
   fullName           String
   password           String
-  cardNumber         String?
+  cardNumber         String            @unique
   isActive           Boolean           @default(true)
   isDeleted          Boolean           @default(false)
   deletedAt          DateTime?
@@ -109,9 +109,9 @@ model Student {
   id              String          @id @default(uuid())
   lastName        String
   firstName       String
-  phoneNumber     String?
+  phoneNumber     String          @unique
   role            String          @default("student")
-  tgId            String?
+  tgId            String          @unique
   tgUsername      String?
   isActive        Boolean         @default(true)
   isBlocked       Boolean         @default(false)
@@ -153,7 +153,7 @@ model Lesson {
   teacherId        String
   student          Student         @relation(fields: [studentId], references: [id])
   studentId        String
-  googleMeetsUrl   String?
+  googleMeetsUrl   String          @unique
   status           LessonStatus
   googleEventId    String?
   price            Decimal
