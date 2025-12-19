@@ -49,165 +49,205 @@ model Admin {
   password    String
   role        AdminRole
   phoneNumber String?
+  isActive    Boolean   @default(true)
+  isDeleted   Boolean   @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@map("admin")
 }
 
 model Teacher {
-  id                    String            @id @default(uuid())
-  email                 String            @unique
-  phoneNumber           String?
-  fullName              String
-  password              String
-  cardNumber            String?
-  isActive              Boolean           @default(true)
-  isDelete              Boolean           @default(false)
-  role                  String            @default("teacher")
-  specification         TeacherSpecialty?
-  level                 String?
-  description           String?
-  hourPrice             Int?
-  portfolioLink         String?
-  imageUrl              String?
-  googleId              String?
-  googleRefreshToken    String?
-  googleAccessToken     String?
-  rating                Int?
-  experience            String?
-  lessons               Lesson[]
-  deletedTeacher        DeletedTeacher[]
-  lessonTemplates       LessonTemplate[]
-  teacherPayments       TeacherPayment[]
-  lessonHistories       LessonHistory[]
+  id                 String            @id @default(uuid())
+  email              String            @unique
+  phoneNumber        String?
+  fullName           String
+  password           String
+  cardNumber         String?
+  isActive           Boolean           @default(true)
+  isDeleted          Boolean           @default(false)
+  deletedAt          DateTime?
+  role               String            @default("teacher")
+  specification      TeacherSpecialty?
+  level              String?
+  description        String?
+  hourPrice          Int?
+  portfolioLink      String?
+  imageUrl           String?
+  googleId           String?
+  googleRefreshToken String?
+  googleAccessToken  String?
+  rating             Int?
+  experience         String?
+  lessons            Lesson[]
+  deletedTeacher     DeletedTeacher[]
+  lessonTemplates    LessonTemplate[]
+  teacherPayments    TeacherPayment[]
+  lessonHistories    LessonHistory[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   @@map("teacher")
 }
 
 model DeletedTeacher {
-  id         String    @id @default(uuid())
-  teacher    Teacher   @relation(fields: [teacherId], references: [id])
-  teacherId  String
-  deletedBy  String
-  reason     String?
-  deletedAt  DateTime  @default(now())
-  restoreAt  DateTime?
+  id        String    @id @default(uuid())
+  teacher   Teacher   @relation(fields: [teacherId], references: [id])
+  teacherId String
+  deletedBy String
+  reason    String?
+  deletedAt DateTime  @default(now())
+  restoreAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@map("deletedTeacher")
 }
 
 model Student {
-  id               String            @id @default(uuid())
-  lastName         String
-  firstName        String
-  phoneNumber      String?
-  role             String            @default("student")
-  tgId             String?
-  tgUsername       String?
-  isBlocked        Boolean           @default(false)
-  blockedAt        DateTime?
-  blockedReason    String?
-  lessons          Lesson[]
-  lessonHistories  LessonHistory[]
-  notifications    Notification[]
-  transactions     Transaction[]
+  id              String          @id @default(uuid())
+  lastName        String
+  firstName       String
+  phoneNumber     String?
+  role            String          @default("student")
+  tgId            String?
+  tgUsername      String?
+  isActive        Boolean         @default(true)
+  isBlocked       Boolean         @default(false)
+  blockedAt       DateTime?
+  blockedReason   String?
+  isDeleted       Boolean         @default(false)
+  deletedAt       DateTime?
+  lessons         Lesson[]
+  lessonHistories LessonHistory[]
+  notifications   Notification[]
+  transactions    Transaction[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   @@map("student")
 }
 
 model LessonTemplate {
-  id          String   @id @default(uuid())
-  teacher     Teacher  @relation(fields: [teacherId], references: [id])
-  teacherId   String
-  name        String
-  timeSlot    String
+  id        String    @id @default(uuid())
+  teacher   Teacher   @relation(fields: [teacherId], references: [id])
+  teacherId String
+  name      String
+  timeSlot  String
+  isActive  Boolean   @default(true)
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@map("lessonTemplate")
 }
 
 model Lesson {
-  id                  String            @id @default(uuid())
-  name                String
-  startTime           DateTime
-  endTime             DateTime
-  teacher             Teacher           @relation(fields: [teacherId], references: [id])
-  teacherId           String
-  student             Student           @relation(fields: [studentId], references: [id])
-  studentId           String
-  googleMeetsUrl      String?
-  status              LessonStatus
-  googleEventId       String?
-  price               Decimal
-  isPaid              Boolean           @default(false)
-  teacherPayment      TeacherPayment?
-  bookedAt            DateTime          @default(now())
-  remainedLessonId    String?
-  completedAt         DateTime?
-  notification        Notification?
-  transactions        Transaction[]
-  lessonHistories     LessonHistory[]
+  id               String          @id @default(uuid())
+  name             String
+  startTime        DateTime
+  endTime          DateTime
+  teacher          Teacher         @relation(fields: [teacherId], references: [id])
+  teacherId        String
+  student          Student         @relation(fields: [studentId], references: [id])
+  studentId        String
+  googleMeetsUrl   String?
+  status           LessonStatus
+  googleEventId    String?
+  price            Decimal
+  isPaid           Boolean         @default(false)
+  teacherPayment   TeacherPayment?
+  bookedAt         DateTime        @default(now())
+  remainedLessonId String?
+  completedAt      DateTime?
+  isDeleted        Boolean         @default(false)
+  deletedAt        DateTime?
+  notification     Notification?
+  transactions     Transaction[]
+  lessonHistories  LessonHistory[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
   @@map("lesson")
 }
 
 model TeacherPayment {
-  id                  String    @id @default(uuid())
-  teacher             Teacher   @relation(fields: [teacherId], references: [id])
-  teacherId           String
-  lesson              Lesson    @relation(fields: [lessonId], references: [id])
-  lessonId            String    @unique
-  totalLessonAmount   Int
-  platformComission   Int
-  platformAmount      Int
-  teacherAmount       Int
-  paidBy              String
-  paidAt              DateTime
-  isCanceled          Boolean   @default(false)
-  canceledAt          DateTime?
-  canceledBy          String?
-  canceledReason      String?
-  notes               String?
+  id                String    @id @default(uuid())
+  teacher           Teacher   @relation(fields: [teacherId], references: [id])
+  teacherId         String
+  lesson            Lesson    @relation(fields: [lessonId], references: [id])
+  lessonId          String    @unique
+  totalLessonAmount Int
+  platformComission Int
+  platformAmount    Int
+  teacherAmount     Int
+  paidBy            String
+  paidAt            DateTime
+  isCanceled        Boolean   @default(false)
+  canceledAt        DateTime?
+  canceledBy        String?
+  canceledReason    String?
+  notes             String?
+  isDeleted         Boolean   @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@map("teacherPayment")
 }
 
 model Transaction {
-  id              String            @id @default(uuid())
-  lesson          Lesson            @relation(fields: [lessonId], references: [id])
-  lessonId        String
-  student         Student           @relation(fields: [studentId], references: [id])
-  studentId       String
-  price           Decimal
-  status          TransactionStatus
-  canceledTime    DateTime?
-  performedTime   DateTime?
-  reason          String?
+  id            String            @id @default(uuid())
+  lesson        Lesson            @relation(fields: [lessonId], references: [id])
+  lessonId      String
+  student       Student           @relation(fields: [studentId], references: [id])
+  studentId     String
+  price         Decimal
+  status        TransactionStatus
+  canceledTime  DateTime?
+  performedTime DateTime?
+  reason        String?
+  isDeleted     Boolean           @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 
   @@map("transaction")
 }
 
 model Notification {
-  id         String    @id @default(uuid())
-  student    Student   @relation(fields: [studentId], references: [id])
-  studentId  String
-  lesson     Lesson    @relation(fields: [lessonId], references: [id])
-  lessonId   String    @unique
-  message    String
-  sendAt     DateTime
-  isSend     Boolean   @default(false)
+  id        String    @id @default(uuid())
+  student   Student   @relation(fields: [studentId], references: [id])
+  studentId String
+  lesson    Lesson    @relation(fields: [lessonId], references: [id])
+  lessonId  String    @unique
+  message   String
+  sendAt    DateTime
+  isSend    Boolean   @default(false)
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@map("notification")
 }
 
 model LessonHistory {
-  id         String   @id @default(uuid())
-  lesson     Lesson   @relation(fields: [lessonId], references: [id])
-  lessonId   String
-  star       Int?
-  feedback   String?
-  teacher    Teacher  @relation(fields: [teacherId], references: [id])
-  teacherId  String
-  student    Student  @relation(fields: [studentId], references: [id])
-  studentId  String
+  id        String    @id @default(uuid())
+  lesson    Lesson    @relation(fields: [lessonId], references: [id])
+  lessonId  String
+  star      Int?
+  feedback  String?
+  teacher   Teacher   @relation(fields: [teacherId], references: [id])
+  teacherId String
+  student   Student   @relation(fields: [studentId], references: [id])
+  studentId String
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@map("lessonHistory")
 }
