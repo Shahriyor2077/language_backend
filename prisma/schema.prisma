@@ -65,34 +65,34 @@ model Admin {
 }
 
 model Teacher {
-  id                 String            @id @default(uuid())
-  email              String            @unique
-  phoneNumber        String            @unique
+  id                 String           @id @default(uuid())
+  email              String           @unique
+  phoneNumber        String           @unique
   fullName           String
   password           String
-  cardNumber         String            @unique
-  isActive           Boolean           @default(true)
-  isDeleted          Boolean           @default(false)
+  cardNumber         String           @unique
+  isActive           Boolean          @default(true)
+  isDeleted          Boolean          @default(false)
   deletedAt          DateTime?
-  role               String            @default("teacher")
-  specification      TeacherSpecialty?
-  level              TeacherLevel      @default(b2)
+  role               String           @default("teacher")
+  specification      TeacherSpecialty @default(english)
+  level              TeacherLevel     @default(b2)
   description        String?
   hourPrice          Int?
   portfolioLink      String?
   imageUrl           String?
-  googleId           String            @unique
-  googleRefreshToken String            @unique
-  googleAccessToken  String            @unique
-  rating             Int?              @default(0)
-  experience         String?           @default("0 years")
+  googleId           String           @unique
+  googleRefreshToken String           @unique
+  googleAccessToken  String           @unique
+  rating             Int?             @default(0)
+  experience         String?          @default("0 years")
   lessons            Lesson[]
   deletedTeacher     DeletedTeacher[]
   lessonTemplates    LessonTemplate[]
   teacherPayments    TeacherPayment[]
   lessonHistories    LessonHistory[]
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
   @@map("teacher")
 }
