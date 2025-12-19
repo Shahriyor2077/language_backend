@@ -54,7 +54,7 @@ model Admin {
   username    String    @unique
   password    String
   role        AdminRole
-  phoneNumber String?
+  phoneNumber String    @unique
   isActive    Boolean   @default(true)
   isDeleted   Boolean   @default(false)
   deletedAt   DateTime?
@@ -81,11 +81,11 @@ model Teacher {
   hourPrice          Int?
   portfolioLink      String?
   imageUrl           String?
-  googleId           String?
-  googleRefreshToken String?
-  googleAccessToken  String?
-  rating             Int?
-  experience         String?
+  googleId           String            @unique
+  googleRefreshToken String            @unique
+  googleAccessToken  String            @unique
+  rating             Int?              @default(0)
+  experience         String?           @default("0 years")
   lessons            Lesson[]
   deletedTeacher     DeletedTeacher[]
   lessonTemplates    LessonTemplate[]
@@ -102,7 +102,7 @@ model DeletedTeacher {
   teacher   Teacher   @relation(fields: [teacherId], references: [id])
   teacherId String
   deletedBy String
-  reason    String?
+  reason    String
   deletedAt DateTime  @default(now())
   restoreAt DateTime?
   createdAt DateTime  @default(now())
@@ -160,7 +160,7 @@ model Lesson {
   student          Student         @relation(fields: [studentId], references: [id])
   studentId        String
   googleMeetsUrl   String          @unique
-  status           LessonStatus
+  status           LessonStatus    @default(available)
   googleEventId    String?
   price            Decimal
   isPaid           Boolean         @default(false)
@@ -211,7 +211,7 @@ model Transaction {
   student       Student           @relation(fields: [studentId], references: [id])
   studentId     String
   price         Decimal
-  status        TransactionStatus
+  status        TransactionStatus     @default(pending)
   canceledTime  DateTime?
   performedTime DateTime?
   reason        String?
@@ -244,7 +244,7 @@ model LessonHistory {
   id        String    @id @default(uuid())
   lesson    Lesson    @relation(fields: [lessonId], references: [id])
   lessonId  String
-  star      Int?
+  star      Int       
   feedback  String?
   teacher   Teacher   @relation(fields: [teacherId], references: [id])
   teacherId String
