@@ -211,7 +211,7 @@ model Transaction {
   student       Student           @relation(fields: [studentId], references: [id])
   studentId     String
   price         Decimal
-  status        TransactionStatus     @default(pending)
+  status        TransactionStatus @default(pending)
   canceledTime  DateTime?
   performedTime DateTime?
   reason        String?
@@ -244,7 +244,7 @@ model LessonHistory {
   id        String    @id @default(uuid())
   lesson    Lesson    @relation(fields: [lessonId], references: [id])
   lessonId  String
-  star      Int       
+  star      Int
   feedback  String?
   teacher   Teacher   @relation(fields: [teacherId], references: [id])
   teacherId String
