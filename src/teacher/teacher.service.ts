@@ -67,8 +67,17 @@ export class TeacherService {
     };
   }
 
-  findAll() {
-    return this.prismaService.teacher.findMany();
+  async findAll() {
+    const teachers = await this.prismaService.teacher.findMany();
+
+    if (!teachers || teachers.length === 0) {
+      throw new NotFoundException('No teachers found');
+    }
+
+    return {
+      message: 'Teachers retrieved successfully',
+      teachers,
+    };
   }
 
   async findOne(id: string) {
@@ -80,7 +89,10 @@ export class TeacherService {
       throw new NotFoundException('Teacher not found');
     }
 
-    return teacher;
+    return {
+      message: 'Teacher retrieved successfully',
+      teacher,
+    };
   }
 
   async update(id: string, updateTeacherDto: UpdateTeacherDto) {
@@ -92,10 +104,15 @@ export class TeacherService {
       throw new NotFoundException('Teacher not found');
     }
 
-    return this.prismaService.teacher.update({
+    const updatedTeacher = await this.prismaService.teacher.update({
       where: { id },
       data: updateTeacherDto,
     });
+
+    return {
+      message: 'Teacher updated successfully',
+      teacher: updatedTeacher,
+    };
   }
 
   async remove(id: string) {
@@ -105,7 +122,13 @@ export class TeacherService {
       throw new NotFoundException(`Teacher with this ${id} not found`);
     }
 
-    return this.prismaService.teacher.delete({ where: { id } });
+    const deletedTeacher = await this.prismaService.teacher.delete({
+      where: { id },
+    });
+    return {
+      message: 'Teacher deleted successfully',
+      deletedTeacher,
+    };
   }
 
   async updatePassword(id: string, dto: UpdatePasswordDto) {
