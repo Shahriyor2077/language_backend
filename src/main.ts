@@ -34,10 +34,6 @@ async function start() {
   const PORT = config.get<number>('PORT');
   app.use(cookieParser());
 
-  // SuperAdmin yaratish
-  const prisma = app.get(PrismaService);
-  await createSuperAdmin(prisma, config);
-
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Language CRM API')
     .setDescription('API documentation for Language CRM')
@@ -53,40 +49,5 @@ async function start() {
   });
 }
 
-async function createSuperAdmin(prisma: PrismaService, config: ConfigService) {
-  try {
-    const username = config.get<string>('SUPER_ADMIN_USERNAME');
-    const password = config.get<string>('SUPER_ADMIN_PASSWORD');
-    const phone = config.get<string>('SUPER_ADMIN_PHONE');
-
-    if (!username || !password || !phone) {
-      console.log('⚠️ SuperAdmin env variables not set, skipping...');
-      return;
-    }
-
-    const exists = await prisma.admin.findFirst({
-      where: { role: 'superAdmin', isDeleted: false },
-    });
-
-    if (!exists) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      await prisma.admin.create({
-        data: {
-          username,
-          password: hashedPassword,
-          role: 'superAdmin',
-          phoneNumber: phone,
-          isActive: true,
-        },
-      });
-      console.log('✅ SuperAdmin yaratildi');
-      console.log(`   Username: ${username}`);
-    } else {
-      console.log('ℹ️ SuperAdmin allaqachon mavjud');
-    }
-  } catch (error) {
-    console.error('❌ SuperAdmin yaratishda xato:', error);
-  }
-}
 
 start();
