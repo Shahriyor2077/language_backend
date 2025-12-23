@@ -22,6 +22,11 @@ import {
   ApiBody,
   ApiSecurity,
 } from '@nestjs/swagger';
+import { TeacherAuthGuard } from '../common/guards/user/jwtUser-auth.guard';
+import { AdminAccessTokenGuard } from '../common/guards/jwtAdmin-accessToken.guard';
+import { IaAdminGuard } from '../common/guards/isAdmin.guard';
+import { AdminRefreshTokenGuard } from '../common/guards/jwtAdmin-refreshToken.guard';
+import { IsSuperAdminGuard } from '../common/guards/jwtAdmin-self.guard';
 
 @ApiTags('teacher')
 @ApiBearerAuth()
@@ -44,7 +49,8 @@ export class TeacherController {
     return this.teacherService.create(createTeacherDto);
   }
 
-  @UseGuards(AdminAuthGuard)
+  /////
+  @UseGuards(AdminAuthGuard, IaAdminGuard)
   @Get()
   @ApiOperation({ summary: 'Get all teachers' })
   @ApiResponse({
@@ -64,6 +70,7 @@ export class TeacherController {
     return this.teacherService.findAll();
   }
 
+  @UseGuards(AdminAuthGuard, IsSuperAdminGuard)
   @Get(':id')
   @ApiOperation({ summary: 'Get a teacher by ID' })
   @ApiParam({

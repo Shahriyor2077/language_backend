@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class AdminAuthGuard implements CanActivate {
+export class TeacherAuthGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
   canActivate(
     context: ExecutionContext,
@@ -18,14 +18,14 @@ export class AdminAuthGuard implements CanActivate {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      throw new UnauthorizedException('Unauthorized admin');
+      throw new UnauthorizedException('Unauthorized user');
     }
 
     const bearer = authHeader.split(' ')[0];
     const token = authHeader.split(' ')[1];
 
     if (bearer != 'Bearer' || !token) {
-      throw new UnauthorizedException('Unauthorized admin');
+      throw new UnauthorizedException('Unauthorized user');
     }
 
     async function verify(token: string, jwtService: JwtService) {
@@ -35,10 +35,10 @@ export class AdminAuthGuard implements CanActivate {
           secret: process.env.ACCESS_TOKEN_KEY,
         });
       } catch (error) {
-        throw new BadGatewayException(error);
+        throw new BadGatewayException('Invalid token', error);
       }
       if (!payload) {
-        throw new UnauthorizedException('Unathorized admin');
+        throw new UnauthorizedException('Unathorized user');
       }
 
       if (!payload.is_active) {
@@ -49,7 +49,7 @@ export class AdminAuthGuard implements CanActivate {
       req.admin = payload;
       return true;
     }
-    console.log("user token: ", token);
+    // console.log('user token: ', token);
     return verify(token, this.jwtService);
   }
 }

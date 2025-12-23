@@ -40,7 +40,11 @@ export class AdminController {
   @Get(':id')
   @ApiOperation({ summary: 'Get admin by ID' })
   findOne(@Param('id') id: string) {
-    return this.adminService.findOne(id);
+    const admin = this.adminService.findOne(id);
+    return {
+      message: "Admin found",
+      data: admin
+    }
   }
 
   @Patch(':id')
