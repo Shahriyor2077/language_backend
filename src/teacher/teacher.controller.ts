@@ -49,7 +49,7 @@ export class TeacherController {
     return this.teacherService.create(createTeacherDto);
   }
 
-  /////
+  ///////
   @UseGuards(AdminAuthGuard, IaAdminGuard)
   @Get()
   @ApiOperation({ summary: 'Get all teachers' })
