@@ -31,6 +31,9 @@ import {
 } from './dto/auth-response.dto';
 import { AdminAuthGuard } from '../common/guards/jwtAdmin-auth.guard';
 import { AdminRefreshTokenGuard } from '../common/guards/jwtAdmin-refreshToken.guard';
+import { UserRefreshTokenGuard } from '../common/guards/user/jwtUser-refreshToken.guard';
+import { CombinedAuthGuard } from '../common/guards/both/jwtCombinedAuth.guard';
+import { AdminSelfOrSuperAdminGuard } from '../common/guards/jwtAdminSelf-superAdmin.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -55,7 +58,9 @@ export class AuthController {
     return this.authService.loginAdmin(dto, res);
   }
 
+  @UseGuards(AdminRefreshTokenGuard)
   @Post('admin/logout')
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Admin logout' })
   @ApiResponse({
@@ -86,6 +91,7 @@ export class AuthController {
     return this.authService.refreshAdminToken(refreshToken, res);
   }
 
+  @UseGuards(AdminAuthGuard)
   @Get('admin/me')
   @UseGuards(AdminAuthGuard)
   @ApiBearerAuth()
@@ -97,6 +103,7 @@ export class AuthController {
     return this.authService.getAdminProfile(user.id);
   }
 
+  @UseGuards(AdminAuthGuard, AdminSelfOrSuperAdminGuard)
   @Patch('admin/me')
   @UseGuards(AdminAuthGuard)
   @ApiBearerAuth()
@@ -130,7 +137,9 @@ export class AuthController {
     return this.authService.loginTeacher(dto, res);
   }
 
+  @UseGuards(UserRefreshTokenGuard)
   @Post('teacher/logout')
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Teacher logout' })
   @ApiResponse({
@@ -142,7 +151,9 @@ export class AuthController {
     return this.authService.logoutTeacher(res);
   }
 
+  @UseGuards(UserRefreshTokenGuard)
   @Post('teacher/refresh')
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh teacher access token' })
   @ApiResponse({
@@ -159,6 +170,7 @@ export class AuthController {
     return this.authService.refreshTeacherToken(refreshToken, res);
   }
 
+  @UseGuards(CombinedAuthGuard)
   @Get('teacher/me')
   @UseGuards(AdminAuthGuard)
   @ApiBearerAuth()
@@ -170,6 +182,7 @@ export class AuthController {
     return this.authService.getTeacherProfile(user.id);
   }
 
+  @UseGuards(CombinedAuthGuard)
   @Patch('teacher/me')
   @UseGuards(AdminAuthGuard)
   @ApiBearerAuth()
