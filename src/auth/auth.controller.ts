@@ -10,14 +10,27 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { UpdateAdminProfileDto, UpdateTeacherProfileDto } from './dto/update-profile.dto';
-import { AuthResponseDto, LogoutResponseDto, RefreshResponseDto } from './dto/auth-response.dto';
+import {
+  UpdateAdminProfileDto,
+  UpdateTeacherProfileDto,
+} from './dto/update-profile.dto';
+import {
+  AuthResponseDto,
+  LogoutResponseDto,
+  RefreshResponseDto,
+} from './dto/auth-response.dto';
 import { AdminAuthGuard } from '../common/guards/jwtAdmin-auth.guard';
-
+import { AdminRefreshTokenGuard } from '../common/guards/jwtAdmin-refreshToken.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -54,8 +67,10 @@ export class AuthController {
     return this.authService.logoutAdmin(res);
   }
 
+  @UseGuards(AdminRefreshTokenGuard)
   @Post('admin/refresh')
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Refresh admin access token' })
   @ApiResponse({
     status: 200,

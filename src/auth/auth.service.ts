@@ -49,6 +49,7 @@ export class AuthService {
       id: admin.id,
       role: admin.role,
       accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken
     };
   }
 
@@ -64,7 +65,7 @@ export class AuthService {
 
     try {
       const payload = await this.jwtService.verifyAsync(refreshToken, {
-        secret: process.env.REFRESH_TOKEN_KEY,
+        secret: process.env.ADMIN_REFRESH_TOKEN_KEY,
       });
 
       const admin = await this.prisma.admin.findFirst({

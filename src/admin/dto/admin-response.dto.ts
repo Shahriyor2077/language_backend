@@ -2,6 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 
 export class AdminResponseDto {
+  @ApiProperty({ example: 'Admin is found' })
+  message: string;
+
   @ApiProperty({ example: 'uuid', description: 'Admin ID' })
   id: string;
 
