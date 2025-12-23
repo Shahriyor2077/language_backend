@@ -24,9 +24,11 @@ import {
 } from '@nestjs/swagger';
 import { TeacherAuthGuard } from '../common/guards/user/jwtUser-auth.guard';
 import { AdminAccessTokenGuard } from '../common/guards/jwtAdmin-accessToken.guard';
-import { IaAdminGuard } from '../common/guards/isAdmin.guard';
 import { AdminRefreshTokenGuard } from '../common/guards/jwtAdmin-refreshToken.guard';
 import { IsSuperAdminGuard } from '../common/guards/jwtAdmin-self.guard';
+import { IsTeacherGuard } from '../common/guards/user/jwtTeacher-self.guard';
+import { RolesGuard } from '../common/guards/jwtRoles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
 
 @ApiTags('teacher')
 @ApiBearerAuth()
@@ -50,7 +52,7 @@ export class TeacherController {
   }
 
   ///////
-  @UseGuards(AdminAuthGuard, IaAdminGuard)
+  @UseGuards(TeacherAuthGuard)
   @Get()
   @ApiOperation({ summary: 'Get all teachers' })
   @ApiResponse({
@@ -70,7 +72,8 @@ export class TeacherController {
     return this.teacherService.findAll();
   }
 
-  @UseGuards(AdminAuthGuard, IsSuperAdminGuard)
+  @UseGuards( AdminAuthGuard, RolesGuard)
+  @Roles('superAdmin')
   @Get(':id')
   @ApiOperation({ summary: 'Get a teacher by ID' })
   @ApiParam({
