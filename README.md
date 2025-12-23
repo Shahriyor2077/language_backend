@@ -98,14 +98,3 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
 
-
-
-
-
-✅ Ushbu create methodning afzalliklari:
-Teacher mavjudligi – xato teacherId kiritilgan bo‘lsa aniq xabar beradi.
-Teacher statusi – deaktiv yoki o‘chirilgan teacher bilan template yaratishni bloklaydi.
-Duplicate check – bir teacher uchun bir xil nom va vaqt bo‘lgan template yaratishni oldini oladi.
-Soft-delete aware – o‘chirilgan template qayta yaratishda muammo bo‘lmaydi.
-Try-catch & error handling – barcha xatolar aniq, status code bilan qaytadi.
-Clear response – statusCode, message va created template ma’lumotini return qiladi.
