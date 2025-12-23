@@ -109,37 +109,3 @@ Duplicate check – bir teacher uchun bir xil nom va vaqt bo‘lgan template yar
 Soft-delete aware – o‘chirilgan template qayta yaratishda muammo bo‘lmaydi.
 Try-catch & error handling – barcha xatolar aniq, status code bilan qaytadi.
 Clear response – statusCode, message va created template ma’lumotini return qiladi.
-
-
-
-
-
-✅ Ushbu methodlarning afzalliklari:
-Try-catch bilan xatolarni boshqaradi.
-Status code bilan response beradi (200 yoki 404).
-findAll – count bilan qaytaradi, shuning uchun front-end sahifalash (pagination) uchun qulay.
-NotFoundException va InternalServerErrorException orqali aniq xabarlar beriladi.
-Include teacher – har bir template bilan teacher ma’lumotini ham olib beradi.
-
-
-
-
-
-✅ Ushbu update methodning afzalliklari:
-Try-catch bilan xatolarni boshqaradi.
-Status code bilan response (200) va xatolarda aniq code (404/400).
-Teacher validatsiyasi – faqat aktiv teacher bilan update qilish.
-Duplicate check – bir teacher uchun bir xil nom va timeSlot bo‘lgan template yaratishni oldini oladi.
-Soft delete aware – o‘chirilgan template bilan ish qilinmaydi.
-Chiroyli response – statusCode, message, va template qaytaradi.
-
-
-
-
-
-✅ Ushbu remove methodning afzalliklari:
-Try-catch bilan xatolarni boshqaradi.
-Status code bilan response beradi (200 yoki xatolarda 400/404).
-Soft delete aware – real o‘chirish emas, isDeleted va deletedAt bilan belgilaydi.
-Optional business rule – agar template asosida dars yaratilgan bo‘lsa, o‘chirishni bloklaydi.
-Chiroyli response – statusCode, message, va deleted template qaytariladi.
