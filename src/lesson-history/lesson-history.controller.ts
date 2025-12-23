@@ -24,7 +24,10 @@ import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
   ApiForbiddenResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import { CombinedAuthGuard } from '../common/guards/both/jwtCombinedAuth.guard';
+import { AdminAuthGuard } from '../common/guards/jwtAdmin-auth.guard';
 
 @ApiTags('Lesson History')
 @ApiForbiddenResponse({ description: 'Forbidden' })
@@ -72,7 +75,9 @@ export class LessonHistoryController {
     return this.lessonHistoryService.findOne(id);
   }
 
+  @UseGuards(CombinedAuthGuard)
   @Patch(':id')
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update lesson history' })
   @ApiBadRequestResponse({ description: 'Validation error' })
@@ -83,7 +88,9 @@ export class LessonHistoryController {
     return this.lessonHistoryService.update(id, dto);
   }
 
+  @UseGuards(AdminAuthGuard)
   @Delete(':id')
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soft delete lesson history' })
   @ApiNotFoundResponse({ description: 'Lesson history not found' })

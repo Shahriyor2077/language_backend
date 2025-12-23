@@ -24,14 +24,20 @@ import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
   ApiForbiddenResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import { CombinedAuthGuard } from '../common/guards/both/jwtCombinedAuth.guard';
+import { TeacherAuthGuard } from '../common/guards/user/jwtUser-auth.guard';
+import { TeacherSelfOrSuperAdminGuard } from '../common/guards/user/jwtTeacherSelf-superAdmin.guard';
 
 @ApiTags('Lesson')
 @ApiForbiddenResponse({ description: 'Forbidden' })
 @Controller('lesson')
+@ApiBearerAuth()
 export class LessonController {
   constructor(private readonly lessonService: LessonService) {}
 
+  @UseGuards(TeacherAuthGuard)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create new lesson' })
@@ -41,6 +47,7 @@ export class LessonController {
     return this.lessonService.create(dto);
   }
 
+  @UseGuards(CombinedAuthGuard)
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get all lessons' })
@@ -65,6 +72,7 @@ export class LessonController {
     });
   }
 
+  @UseGuards(CombinedAuthGuard, TeacherSelfOrSuperAdminGuard)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get lesson by id' })
@@ -74,6 +82,7 @@ export class LessonController {
     return this.lessonService.findOne(id);
   }
 
+  @UseGuards(CombinedAuthGuard, TeacherSelfOrSuperAdminGuard)
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update lesson' })
@@ -82,6 +91,7 @@ export class LessonController {
     return this.lessonService.update(id, dto);
   }
 
+  @UseGuards(CombinedAuthGuard, TeacherSelfOrSuperAdminGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete lesson (soft delete)' })

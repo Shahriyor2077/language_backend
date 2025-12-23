@@ -24,7 +24,14 @@ import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
   ApiForbiddenResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import { TeacherAuthGuard } from '../common/guards/user/jwtUser-auth.guard';
+import { CombinedAuthGuard } from '../common/guards/both/jwtCombinedAuth.guard';
+import { AdminAuthGuard } from '../common/guards/jwtAdmin-auth.guard';
+import { RolesGuard } from '../common/guards/jwtRoles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { TeacherSelfOrSuperAdminGuard } from '../common/guards/user/jwtTeacherSelf-superAdmin.guard';
 
 @ApiTags('Lesson Template')
 @ApiForbiddenResponse({ description: 'Forbidden' })
@@ -32,7 +39,9 @@ import {
 export class LessonTemplateController {
   constructor(private readonly lessonTemplateService: LessonTemplateService) {}
 
+  @UseGuards(TeacherAuthGuard)
   @Post()
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create lesson template' })
   @ApiCreatedResponse({ description: 'Lesson template created successfully' })
@@ -41,7 +50,10 @@ export class LessonTemplateController {
     return this.lessonTemplateService.create(dto);
   }
 
+  @UseGuards(AdminAuthGuard, RolesGuard)
+  @Roles('admin')
   @Get()
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get all lesson templates' })
   @ApiOkResponse({ description: 'Lesson templates retrieved successfully' })
@@ -65,7 +77,9 @@ export class LessonTemplateController {
     });
   }
 
+  @UseGuards(CombinedAuthGuard, TeacherSelfOrSuperAdminGuard)
   @Get(':id')
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get lesson template by id' })
   @ApiParam({ name: 'id', type: String })
@@ -74,7 +88,9 @@ export class LessonTemplateController {
     return this.lessonTemplateService.findOne(id);
   }
 
+  @UseGuards(CombinedAuthGuard, TeacherSelfOrSuperAdminGuard)
   @Patch(':id')
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update lesson template' })
   @ApiBadRequestResponse({ description: 'Validation error' })
@@ -85,7 +101,9 @@ export class LessonTemplateController {
     return this.lessonTemplateService.update(id, dto);
   }
 
+  @UseGuards(CombinedAuthGuard, TeacherSelfOrSuperAdminGuard)
   @Delete(':id')
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soft delete lesson template' })
   @ApiNotFoundResponse({ description: 'Lesson template not found' })
