@@ -63,13 +63,11 @@ export class LessonTemplateService {
 
       console.error('LessonTemplate creation error:', error);
 
-      throw new InternalServerErrorException(
-        'Lesson template creation failed',
-      );
+      throw new InternalServerErrorException('Lesson template creation failed');
     }
   }
 
-   async findAll() {
+  async findAll() {
     try {
       const [templates, count] = await this.prisma.$transaction([
         this.prisma.lessonTemplate.findMany({
@@ -132,7 +130,7 @@ export class LessonTemplateService {
     }
   }
 
-   async update(id: string, dto: UpdateLessonTemplateDto) {
+  async update(id: string, dto: UpdateLessonTemplateDto) {
     try {
       const existingTemplate = await this.prisma.lessonTemplate.findFirst({
         where: { id, isDeleted: false },
@@ -197,7 +195,7 @@ export class LessonTemplateService {
         'Failed to update lesson template',
       );
     }
-  } 
+  }
 
   async remove(id: string) {
     try {
@@ -212,7 +210,11 @@ export class LessonTemplateService {
       }
 
       const usedInLesson = await this.prisma.lesson.findFirst({
-        where: { isDeleted: false, teacherId: template.teacherId, name: template.name },
+        where: {
+          isDeleted: false,
+          teacherId: template.teacherId,
+          name: template.name,
+        },
       });
 
       if (usedInLesson) {
