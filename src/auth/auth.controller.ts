@@ -42,7 +42,7 @@ import { TeacherAuthGuard } from '../common/guards/teacher-auth.guard';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('admin/login')
   @HttpCode(HttpStatus.OK)
@@ -227,7 +227,6 @@ export class AuthController {
     return result;
   }
 
-
   @Post('teacher/send-otp')
   @UseGuards(TeacherAuthGuard)
   @ApiBearerAuth()
@@ -238,7 +237,12 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Telefon raqam allaqachon mavjud' })
   async sendOtp(@Req() req: Request, @Body() dto: SendOtpDto) {
     const user = req.user as { id: string };
-    return this.authService.sendOtp(dto.phoneNumber, user.id);
+    return this.authService.sendOtp(
+      dto.phoneNumber,
+      user.id,
+      dto.password,
+      dto.confirmPassword,
+    );
   }
 
   @Post('teacher/verify-otp')
@@ -248,7 +252,10 @@ export class AuthController {
   @ApiOperation({ summary: 'OTP kodni tasdiqlash' })
   @ApiBody({ type: VerifyOtpDto })
   @ApiResponse({ status: 200, description: 'Telefon raqam tasdiqlandi' })
-  @ApiResponse({ status: 400, description: 'OTP noto\'g\'ri yoki muddati tugagan' })
+  @ApiResponse({
+    status: 400,
+    description: "OTP noto'g'ri yoki muddati tugagan",
+  })
   async verifyOtp(
     @Body() dto: VerifyOtpDto,
     @Res({ passthrough: true }) res: Response,
