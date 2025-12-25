@@ -14,6 +14,8 @@ export class TeacherLessonOwnerGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const admin = req.admin;
 
+    console.log("this is admin",admin);
+
     if (admin.role === 'superAdmin' || admin.role === 'admin') {
       return true;
     }
