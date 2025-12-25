@@ -38,7 +38,7 @@ import { TeacherLessonOwnerGuard } from '../common/guards/user/jwtTeacher-ownles
 export class LessonController {
   constructor(private readonly lessonService: LessonService) {}
 
-  @UseGuards(TeacherAuthGuard)
+  @UseGuards(TeacherAuthGuard, TeacherSelfOrSuperAdminGuard)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create new lesson' })

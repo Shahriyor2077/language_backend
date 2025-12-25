@@ -20,7 +20,6 @@ export class LessonService {
     endTime: Date,
     lessonName: string,
   ): Promise<{ hangoutLink: string; eventId: string }> {
-    // Changed return type
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_SECRET,
@@ -53,7 +52,6 @@ export class LessonService {
         conferenceDataVersion: 1,
       });
 
-      // Return both the link and the ID
       return {
         hangoutLink: response.data.hangoutLink!,
         eventId: response.data.id!,
@@ -231,6 +229,7 @@ export class LessonService {
       ) {
         throw error;
       }
+      console.log(error);
       throw new InternalServerErrorException('Lesson creation failed');
     }
   }
