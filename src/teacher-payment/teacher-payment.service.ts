@@ -156,8 +156,8 @@ export class TeacherPaymentService {
     const payments = await this.prismaService.teacherPayment.findMany({
       where,
       include: {
-        teacher: true,
-        lesson: true,
+        // teacher: true,
+        // lesson: true,
       },
       skip,
       take: limit,
@@ -186,7 +186,7 @@ export class TeacherPaymentService {
       },
       include: {
         teacher: true,
-        lesson: true,
+        // lesson: true,
       },
     });
 
@@ -315,5 +315,25 @@ export class TeacherPaymentService {
         canceledReason,
       },
     });
+  }
+
+  async getTeacherPaymentsByid(teacherId: string) {
+    const payments = await this.prismaService.teacherPayment.findMany({
+      where: {
+        teacherId,
+      },
+    });
+
+    if (payments.length === 0) {
+      return {
+        totalPayments: 0,
+        totalAmountPaid: 0,
+      };
+    }
+
+    return {
+      message: 'Teacher payments retrieved successfully',
+      payments,
+    };
   }
 }

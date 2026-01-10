@@ -73,23 +73,29 @@ export class TeacherPaymentController {
   }
 
   // ================= GET ONE =================
+
+  @Get('teacher/:teacherId')
+  @UseGuards(CombinedAuthGuard)
+  @ApiOperation({
+    summary: 'Get payments by teacher ID',
+  })
+  @ApiParam({
+    name: 'teacherId',
+    description: 'Teacher ID',
+  })
+  getTeacherPaymentsByid(@Param('teacherId') teacherId: string) {
+    return this.teacherPaymentService.getTeacherPaymentsByid(teacherId);
+  }
+
   @Get(':id')
   @UseGuards(CombinedAuthGuard, TeacherSelfOrSuperAdminGuard)
   @ApiOperation({
-    summary: 'Get teacher payment by ID',
-    description:
-      'Teachers can access their own payments. Super admins can access any.',
+    summary: 'Get payment by payment ID',
   })
   @ApiParam({
     name: 'id',
     description: 'Teacher payment ID',
-    example: 'clx9abc123xyz',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Teacher payment retrieved successfully',
-  })
-  @ApiResponse({ status: 404, description: 'Payment not found' })
   findOne(@Param('id') id: string) {
     return this.teacherPaymentService.findOne(id);
   }
