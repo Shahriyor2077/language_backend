@@ -26,9 +26,10 @@ export class CreateLessonDto {
   @IsUUID()
   teacherId: string;
 
-  @ApiProperty()
+  // @ApiProperty()
+  @IsOptional()
   @IsUUID()
-  studentId: string;
+  studentId?: string;
 
   @IsOptional()
   googleMeetsUrl?: string;
@@ -37,7 +38,7 @@ export class CreateLessonDto {
   @IsNumber()
   price: number;
 
-  @ApiProperty({ required: false })
+  // @ApiProperty({ required: false, default: false })
   @IsOptional()
   @IsBoolean()
   isPaid?: boolean;
