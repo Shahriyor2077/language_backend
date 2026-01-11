@@ -11,7 +11,6 @@ export class TeacherSelfOrSuperAdminGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const paramId = req.params.id;
     const admin = req.admin;
-    const bodyTeacherId = req.body.teacherId;
 
     if (admin.role === 'superAdmin' || admin.role === 'admin') {
       return true;
@@ -21,7 +20,7 @@ export class TeacherSelfOrSuperAdminGuard implements CanActivate {
       return true;
     }
 
-    if (admin.role === 'teacher' && admin.id === bodyTeacherId) {
+    if (admin.role === 'teacher' && admin.id === paramId) {
       return true;
     }
 

@@ -45,6 +45,13 @@ export class StudentController {
     return this.studentService.findAll(query);
   }
 
+  @Get('teachers-all')
+  @ApiOperation({ summary: 'Get all teachers with search and pagination' })
+  @ApiQuery({ type: StudentQueryDto })
+  findTeachers(@Query() query: StudentQueryDto) {
+    return this.studentService.findTeachers();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a student by ID' })
   @ApiParam({ name: 'id', type: String })

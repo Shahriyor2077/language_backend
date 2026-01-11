@@ -268,6 +268,13 @@ export class AuthService {
         isActive: true,
         createdAt: true,
         updatedAt: true,
+        cardNumber: true,
+        lessons: {
+          select: {
+            id: true,
+            status: true,
+          },
+        },
       },
     });
 
@@ -275,7 +282,10 @@ export class AuthService {
       throw new NotFoundException('Teacher topilmadi');
     }
 
-    return teacher;
+    return {
+      message: 'Muvaffaqiyatli olindi',
+      teacher,
+    };
   }
 
   async updateTeacherProfile(teacherId: string, dto: UpdateTeacherProfileDto) {
