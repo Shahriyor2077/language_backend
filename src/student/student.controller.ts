@@ -53,6 +53,16 @@ export class StudentController {
 
   @UseGuards(AdminAuthGuard, RolesGuard)
   @Roles('admin')
+  @Get('teachers-all')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all teachers with search and pagination' })
+  @ApiQuery({ type: StudentQueryDto })
+  findTeachers(@Query() query: StudentQueryDto) {
+    return this.studentService.findTeachers();
+  }
+
+  @UseGuards(AdminAuthGuard, RolesGuard)
+  @Roles('admin')
   @Get(':id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a student by ID' })

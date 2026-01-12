@@ -157,15 +157,15 @@ model Lesson {
   endTime          DateTime
   teacher          Teacher         @relation(fields: [teacherId], references: [id])
   teacherId        String
-  student          Student         @relation(fields: [studentId], references: [id])
-  studentId        String
+  student          Student?         @relation(fields: [studentId], references: [id])
+  studentId        String?
   googleMeetsUrl   String          @unique
   status           LessonStatus    @default(available)
   googleEventId    String?
   price            Decimal
   isPaid           Boolean         @default(false)
   teacherPayment   TeacherPayment?
-  bookedAt         DateTime        @default(now())
+  bookedAt         DateTime?       @default(now())
   remainedLessonId String?
   completedAt      DateTime?
   isDeleted        Boolean         @default(false)

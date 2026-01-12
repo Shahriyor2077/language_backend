@@ -122,4 +122,15 @@ export class StudentService {
       lessons: Mylessons,
     };
   }
+
+  async findTeachers() {
+    const Teachers = await this.prisma.teacher.findMany();
+    if (!Teachers) {
+      throw new NotFoundException('No teachers found');
+    }
+    return {
+      message: 'Teachers retrieved successfully',
+      teachers: Teachers,
+    };
+  }
 }

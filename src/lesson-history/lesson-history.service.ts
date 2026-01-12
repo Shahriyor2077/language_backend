@@ -11,7 +11,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class LessonHistoryService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(dto: CreateLessonHistoryDto) {
     try {
@@ -339,9 +339,9 @@ export class LessonHistoryService {
 
     if (!lessons.length) {
       return {
-        message: "No lesson histroies so far",
-        lessons
-      }
+        message: 'No lesson histroies so far',
+        lessons,
+      };
     }
 
     return {
@@ -358,6 +358,7 @@ export class LessonHistoryService {
       where: {
         endTime: { lte: now },
         isDeleted: false,
+        studentId: { not: { equals: null as any } }, // Only get lessons with a student assigned
         lessonHistories: {
           none: { isDeleted: false },
         },
@@ -374,7 +375,7 @@ export class LessonHistoryService {
           data: {
             lessonId: lesson.id,
             teacherId: lesson.teacherId,
-            studentId: lesson.studentId,
+            studentId: lesson.studentId as string, // Safe to cast since we filtered for non-null
             star: 0, // Default - teacher can update later
             feedback: 'Automatically created by system',
           },

@@ -96,12 +96,12 @@ export class LessonService {
         throw new NotFoundException('Teacher not found');
       }
 
-      const student = await this.prisma.student.findUnique({
-        where: { id: dto.studentId },
-      });
-      if (!student) {
-        throw new NotFoundException('Student not found');
-      }
+      // const student = await this.prisma.student.findUnique({
+      //   where: { id: dto.studentId },
+      // });
+      // if (!student) {
+      //   throw new NotFoundException('Student not found');
+      // }
 
       const durationMs = endTime.getTime() - startTime.getTime();
       const durationMinutes = durationMs / (1000 * 60);
@@ -209,7 +209,7 @@ export class LessonService {
           startTime,
           endTime,
           teacherId: dto.teacherId,
-          studentId: dto.studentId,
+          studentId: null as any,
           googleMeetsUrl: generatedMeetsUrl.hangoutLink,
           googleEventId: generatedMeetsUrl.eventId,
           price: dto.price,
@@ -218,7 +218,6 @@ export class LessonService {
       });
 
       return {
-        statusCode: 201,
         message: 'Lesson created successfully',
         lesson,
       };
@@ -447,7 +446,7 @@ export class LessonService {
   async findAllbyTeacher(teacherId: string) {
     const lessons = await this.prisma.lesson.findMany({
       where: { teacherId, isDeleted: false },
-      include: { student: true },
+      // include: { student: true },
     });
 
     if (!lessons.length) {
