@@ -35,7 +35,7 @@ async function start() {
   const uploadsPath = join(process.cwd(), 'uploads');
   console.log('📁 Uploads directory:', uploadsPath);
   console.log('📁 Directory exists:', fs.existsSync(uploadsPath));
-  
+
   if (fs.existsSync(uploadsPath)) {
     const files = fs.readdirSync(join(uploadsPath, 'teachers'));
   }
@@ -43,7 +43,7 @@ async function start() {
   expressApp.use('/uploads', express.static(uploadsPath));
 
   app.useGlobalFilters(new AllExceptionFilter());
-  
+
   app.useGlobalPipes(
     new ValidationPipe({
       exceptionFactory: (errors) => {
@@ -80,7 +80,7 @@ async function start() {
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);
-  
+
   await app.listen(PORT, () => {
     console.log(`Server running on port: ${PORT}`);
   });
