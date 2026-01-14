@@ -10,10 +10,17 @@ import * as bcrypt from 'bcrypt';
 import { UpdatePasswordDto } from './dto/updatePassword.dto';
 import { unlink } from 'fs/promises';
 import { join } from 'path';
+// import sharp from 'sharp';
+// import sharp from 'sharp';
+const sharp = require('sharp');
 
 @Injectable()
 export class TeacherService {
   constructor(private readonly prismaService: PrismaService) {}
+  private readonly UPLOAD_DIR = './uploads/teachers';
+  private readonly MAX_WIDTH = 800;
+  private readonly MAX_HEIGHT = 800;
+  private readonly QUALITY = 80;
 
   async create(createTeacherDto: CreateTeacherDto) {
     const {
@@ -168,28 +175,49 @@ export class TeacherService {
     });
 
     if (!teacher) {
-      // Delete the uploaded file if teacher not found
-      await unlink(join('./uploads/teachers', filename)).catch(() => {});
+      await this.deleteFile(join(this.UPLOAD_DIR, filename));
       throw new NotFoundException('Teacher not found');
     }
 
-    // Delete old image if exists
-    if (teacher.imageUrl) {
-      const oldImagePath = join('./', teacher.imageUrl);
-      await unlink(oldImagePath).catch(() => {});
+    try {
+      // Compress and optimize the image
+      const inputPath = join(this.UPLOAD_DIR, filename);
+      const compressedFilename = `compressed-${Date.now()}-${filename.replace(/\.[^/.]+$/, '')}.jpg`;
+      const outputPath = join(this.UPLOAD_DIR, compressedFilename);
+
+      await sharp(inputPath)
+        .resize(this.MAX_WIDTH, this.MAX_HEIGHT, {
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
+        .jpeg({ quality: this.QUALITY, progressive: true })
+        .toFile(outputPath);
+
+      // Delete the original uncompressed file
+      await this.deleteFile(inputPath);
+
+      // Delete old image if exists
+      if (teacher.imageUrl) {
+        await this.deleteFile(join('./', teacher.imageUrl));
+      }
+
+      const imageUrl = `uploads/teachers/${compressedFilename}`;
+      const updatedTeacher = await this.prismaService.teacher.update({
+        where: { id },
+        data: { imageUrl },
+      });
+      return {
+        message: 'Image uploaded and compressed successfully',
+        teacher: updatedTeacher,
+      };
+    } catch (error) {
+      // Clean up on error
+      await this.deleteFile(join(this.UPLOAD_DIR, filename));
+      throw error;
     }
-
-    const imageUrl = `uploads/teachers/${filename}`;
-
-    const updatedTeacher = await this.prismaService.teacher.update({
-      where: { id },
-      data: { imageUrl },
-    });
-
-    return {
-      message: 'Image uploaded successfully',
-      teacher: updatedTeacher,
-    };
+  }
+  private async deleteFile(path: string): Promise<void> {
+    await unlink(path).catch(() => {});
   }
 
   async deleteImage(id: string) {
