@@ -1,5 +1,5 @@
 // dto/create-lesson.dto.ts
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   IsDateString,
@@ -26,7 +26,7 @@ export class CreateLessonDto {
   @IsUUID()
   teacherId: string;
 
-  // @ApiProperty()
+  @ApiProperty()
   @IsOptional()
   @IsUUID()
   studentId?: string;
