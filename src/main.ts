@@ -20,7 +20,6 @@ async function start() {
   const config = app.get(ConfigService);
   const PORT = config.get<number>('PORT') ?? 3030;
 
-  // Get Express instance
   const expressApp = app.getHttpAdapter().getInstance();
 
   app.enableCors({
