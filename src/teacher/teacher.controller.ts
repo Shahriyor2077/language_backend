@@ -37,7 +37,7 @@ import { multerConfig } from 'src/config/multer.config';
 @ApiBearerAuth()
 @Controller('teacher')
 export class TeacherController {
-  constructor(private readonly teacherService: TeacherService) {}
+  constructor(private readonly teacherService: TeacherService) { }
 
   @UseGuards(AdminAuthGuard, RolesGuard)
   @Roles('admin')
@@ -169,7 +169,7 @@ export class TeacherController {
     return this.teacherService.updatePassword(id, dto);
   }
 
-  @Post(':id/upload-image')
+  @Patch(':id/upload-image')
   @UseInterceptors(FileInterceptor('image', multerConfig))
   uploadImage(
     @Param('id') id: string,
