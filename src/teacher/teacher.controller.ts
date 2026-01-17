@@ -11,6 +11,7 @@ import {
   UploadedFile,
   BadRequestException,
 } from '@nestjs/common';
+import type { Express } from 'express';
 import { TeacherService } from './teacher.service';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
@@ -28,7 +29,6 @@ import {
 import { RolesGuard } from '../common/guards/jwtRoles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { TeacherSelfOrSuperAdminGuard } from '../common/guards/user/jwtTeacherSelf-superAdmin.guard';
-import { TeacherAuthGuard } from '../common/guards/user/jwtUser-auth.guard';
 import { CombinedAuthGuard } from '../common/guards/both/jwtCombinedAuth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from 'src/config/multer.config';
