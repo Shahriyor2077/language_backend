@@ -49,18 +49,18 @@ const sessions = new LocalSession({
     DeletedTeacherModule,
     AdminModule,
     AuthModule,
-    TelegrafModule.forRootAsync({
-      botName: BOT_NAME,
-      useFactory: () => ({
-        token: process.env.BOT_TOKEN!,
-        include: [BotModule],
-        middlewares: [sessions.middleware()],
-        launchConfig: {
-          allowUserSigterm: true,
-          dropPendingUpdates: true,
-        },
-      }),
-    }),
+    // TelegrafModule.forRootAsync({
+    //   botName: BOT_NAME,
+    //   useFactory: () => ({
+    //     token: process.env.BOT_TOKEN!,
+    //     include: [BotModule],
+    //     middlewares: [sessions.middleware()],
+    //     launchConfig: {
+    //       allowUserSigterm: true,
+    //       dropPendingUpdates: true,
+    //     },
+    //   }),
+    // }),
     // BotModule, // Disabled for production - Telegram connection timeout
   ],
   controllers: [],
