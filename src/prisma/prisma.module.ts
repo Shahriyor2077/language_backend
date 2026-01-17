@@ -4,6 +4,6 @@ import { SeedService } from './seed.service';
 
 @Module({
   providers: [PrismaService, SeedService],
-  exports: [PrismaService],
+  exports: [PrismaService, SeedService],
 })
-export class PrismaModule {}
+export class PrismaModule { }
