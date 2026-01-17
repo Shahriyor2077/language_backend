@@ -55,11 +55,15 @@ const sessions = new LocalSession({
         token: process.env.BOT_TOKEN!,
         include: [BotModule],
         middlewares: [sessions.middleware()],
+        launchConfig: {
+          allowUserSigterm: true,
+          dropPendingUpdates: true,
+        },
       }),
     }),
-    BotModule,
+    // BotModule, // Disabled for production - Telegram connection timeout
   ],
   controllers: [],
   providers: [GoogleStrategy],
 })
-export class AppModule {}
+export class AppModule { }
