@@ -1,0 +1,14 @@
+import * as Prisma from './internal/prismaNamespaceBrowser';
+export { Prisma };
+export * as $Enums from './enums';
+export * from './enums';
+export type Admin = Prisma.AdminModel;
+export type Teacher = Prisma.TeacherModel;
+export type DeletedTeacher = Prisma.DeletedTeacherModel;
+export type Student = Prisma.StudentModel;
+export type LessonTemplate = Prisma.LessonTemplateModel;
+export type Lesson = Prisma.LessonModel;
+export type TeacherPayment = Prisma.TeacherPaymentModel;
+export type Transaction = Prisma.TransactionModel;
+export type Notification = Prisma.NotificationModel;
+export type LessonHistory = Prisma.LessonHistoryModel;
