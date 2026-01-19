@@ -1,4 +1,3 @@
-// src/prisma/seed.service.ts
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { ConfigService } from '@nestjs/config';
@@ -9,7 +8,7 @@ export class SeedService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     await this.createSuperAdmin();

@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class CombinedAuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(private readonly jwtService: JwtService) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
@@ -42,11 +42,11 @@ export class CombinedAuthGuard implements CanActivate {
 
       req.admin = payload;
       return true;
-    } catch (adminError) {}
+    } catch (adminError) { }
 
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: process.env.ACCESS_TOKEN_KEY, // Teacher secret
+        secret: process.env.ACCESS_TOKEN_KEY,
       });
 
       if (!payload) {

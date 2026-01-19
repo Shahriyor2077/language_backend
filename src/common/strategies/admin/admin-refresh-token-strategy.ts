@@ -10,7 +10,6 @@ import { JwtPayload } from '../../types/admin/admin.payload.types';
 import { JwtPayloadWithRefreshTokenAdmin } from '../../types/admin/admin.ref.types';
 
 export const cookieExtractor: JwtFromRequestFunction = (req: Request) => {
-  // console.log(req.cookies);
   if (req && req.cookies) {
     return req.cookies['refreshToken'];
   }

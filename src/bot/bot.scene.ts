@@ -15,7 +15,7 @@ interface BotContext extends Context {
 
 @Scene('registration')
 export class RegistrationScene {
-  constructor(private readonly botService: BotService) {}
+  constructor(private readonly botService: BotService) { }
 
   @SceneEnter()
   async onEnter(@Ctx() ctx: BotContext) {
@@ -53,7 +53,6 @@ export class RegistrationScene {
 
     ctx.session.phoneNumber = contact.phone_number;
 
-    // Register student
     await this.botService.registerStudent({
       tgId: ctx.from?.id!,
       firstName: ctx.session.firstName!,
@@ -64,7 +63,6 @@ export class RegistrationScene {
 
     await ctx.reply("✅ Ro'yxatdan o'tdingiz!", Markup.removeKeyboard());
 
-    // Clear session and leave scene
     ctx.session = {};
     await ctx.scene.leave();
   }

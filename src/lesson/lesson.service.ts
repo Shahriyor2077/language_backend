@@ -13,7 +13,6 @@ import { google } from 'googleapis';
 export class LessonService {
   constructor(private readonly prisma: PrismaService) { }
 
-  /// generating google meet link
   private async generateGoogleMeetLink(
     teacher: any,
     startTime: Date,
@@ -66,19 +65,16 @@ export class LessonService {
 
   async create(dto: CreateLessonDto) {
     try {
-      // date time logic check start
       const startTime = new Date(dto.startTime);
       const endTime = new Date(dto.endTime);
       const now = new Date();
 
-      // 2. Check if start time is in the past
       if (startTime.getTime() <= now.getTime()) {
         throw new BadRequestException(
           `Start time must be in the future. Current time: ${now.toISOString()}, Your start time: ${startTime.toISOString()}`,
         );
       }
 
-      // 3. Check if end datetime is in the past
       if (endTime.getTime() <= now.getTime()) {
         throw new BadRequestException(
           `End time must be in the future. Current time: ${now.toISOString()}, Your end time: ${endTime.toISOString()}`,
@@ -96,13 +92,6 @@ export class LessonService {
         throw new NotFoundException('Teacher not found');
       }
 
-      // const student = await this.prisma.student.findUnique({
-      //   where: { id: dto.studentId },
-      // });
-      // if (!student) {
-      //   throw new NotFoundException('Student not found');
-      // }
-
       const durationMs = endTime.getTime() - startTime.getTime();
       const durationMinutes = durationMs / (1000 * 60);
       const ALLOWED_DURATIONS_MINUTES = [30, 45, 60, 90, 120];
@@ -113,39 +102,32 @@ export class LessonService {
         );
       }
 
-      // date time logic check end
-
       const teacher = await this.prisma.teacher.findUnique({
         where: { id: dto.teacherId },
       });
       if (!teacher) throw new NotFoundException('Teacher not found');
 
-      // Check if teacher has linked Google
       if (!teacher.googleAccessToken) {
         throw new BadRequestException(
           'Teacher must connect Google account to create lessons',
         );
       }
 
-      // Add 15-minute break buffer to the end time for checking conflicts
       const BREAK_TIME_MINUTES = 15;
       const endTimeWithBreak = new Date(
         endTime.getTime() + BREAK_TIME_MINUTES * 60 * 1000,
       );
 
-      // Check if teacher is busy (including 15-minute break after their lessons)
       const teacherBusy = await this.prisma.lesson.findFirst({
         where: {
           teacherId: dto.teacherId,
           isDeleted: false,
           OR: [
             {
-              // Check if new lesson overlaps with existing lesson
               startTime: { lt: endTime },
               endTime: { gt: startTime },
             },
             {
-              // Check if new lesson starts during another lesson's break time
               startTime: { lt: endTimeWithBreak },
               endTime: { gt: startTime },
             },
@@ -159,7 +141,6 @@ export class LessonService {
         );
       }
 
-      // Check if the new lesson starts too soon after teacher's previous lesson
       const previousTeacherLesson = await this.prisma.lesson.findFirst({
         where: {
           teacherId: dto.teacherId,
@@ -192,16 +173,12 @@ export class LessonService {
         );
       }
 
-      // GENERATE GOOGLE MEET LINK
-
       const generatedMeetsUrl = await this.generateGoogleMeetLink(
         teacher,
         startTime,
         endTime,
         dto.name,
       );
-
-      // 4. SAVE TO DB
 
       const lesson = await this.prisma.lesson.create({
         data: {
@@ -446,11 +423,9 @@ export class LessonService {
   async findAllbyTeacher(teacherId: string) {
     const lessons = await this.prisma.lesson.findMany({
       where: { teacherId, isDeleted: false },
-      // include: { student: true },
     });
 
     if (!lessons.length) {
-      // throw new NotFoundException('No lessons found for this teacher');
       return {
         message: 'No lessons found for this teacher',
         lessons: [],

@@ -30,9 +30,8 @@ import { CancelTeacherPaymentDto } from './dto/cancel-teacher-payment.dto';
 @ApiBearerAuth()
 @Controller('teacher-payments')
 export class TeacherPaymentController {
-  constructor(private readonly teacherPaymentService: TeacherPaymentService) {}
+  constructor(private readonly teacherPaymentService: TeacherPaymentService) { }
 
-  // ================= CREATE =================
   @Post()
   @UseGuards(AdminAuthGuard, RolesGuard)
   @Roles('admin')
@@ -55,7 +54,6 @@ export class TeacherPaymentController {
     return this.teacherPaymentService.create(dto);
   }
 
-  // ================= LIST =================
   @Get()
   @UseGuards(AdminAuthGuard, RolesGuard)
   @Roles('admin')
@@ -71,8 +69,6 @@ export class TeacherPaymentController {
   findAll() {
     return this.teacherPaymentService.findAll();
   }
-
-  // ================= GET ONE =================
 
   @Get('teacher/:teacherId')
   @UseGuards(CombinedAuthGuard)
@@ -100,7 +96,6 @@ export class TeacherPaymentController {
     return this.teacherPaymentService.findOne(id);
   }
 
-  // ================= UPDATE =================
   @Patch(':id')
   @UseGuards(AdminAuthGuard, RolesGuard)
   @Roles('admin')
@@ -123,7 +118,6 @@ export class TeacherPaymentController {
     return this.teacherPaymentService.update(id, dto);
   }
 
-  // ================= DELETE =================
   @Delete(':id')
   @UseGuards(AdminAuthGuard, RolesGuard)
   @Roles('admin')
@@ -140,7 +134,6 @@ export class TeacherPaymentController {
     return this.teacherPaymentService.remove(id);
   }
 
-  // ================= CANCEL =================
   @Patch(':id/cancel')
   @UseGuards(AdminAuthGuard, RolesGuard)
   @Roles('admin')

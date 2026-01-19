@@ -3,14 +3,13 @@ import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
 export class TeacherOwnsLessonOrAdminGuard implements CanActivate {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
     const { id: lessonId } = req.params;
     const admin = req.admin;
 
-    // Admins can do anything
     if (admin.role === 'superAdmin' || admin.role === 'admin') {
       return true;
     }

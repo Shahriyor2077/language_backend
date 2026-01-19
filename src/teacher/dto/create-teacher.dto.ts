@@ -49,22 +49,18 @@ export class CreateTeacherDto {
     description: 'Account password (minimum 6 characters)',
     example: 'StrongPassword123!',
     minLength: 6,
-    // Note: Uncomment @IsStrongPassword() for stricter validation
   })
   @IsString()
   @MinLength(6)
-  // @IsStrongPassword()
   password: string;
 
   @ApiProperty({
     description: 'To make sure the password is correct(minimum 6 characters)',
     example: 'StrongPassword123!',
     minLength: 6,
-    // Note: Uncomment @IsStrongPassword() for stricter validation
   })
   @IsString()
   @MinLength(6)
-  // @IsStrongPassword()
   confirm_password: string;
 
   @ApiProperty({

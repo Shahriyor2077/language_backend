@@ -21,8 +21,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
   authorizationParams(): { [key: string]: string } {
     return {
-      access_type: 'offline', // Critical for Meet links
-      prompt: 'consent', // Ensures you get the refresh token every time during testing
+      access_type: 'offline',
+      prompt: 'consent',
     };
   }
 
@@ -34,7 +34,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ): Promise<void> {
     const { id, emails, displayName, photos } = profile;
 
-    // Email mavjudligini tekshirish
     if (!emails || emails.length === 0) {
       done(new Error('Email topilmadi'), false);
       return;

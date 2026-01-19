@@ -1,4 +1,3 @@
-// find-notification.dto.ts
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsDate, IsOptional, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';

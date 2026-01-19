@@ -10,12 +10,11 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class DeletedTeacherService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
 
   async create(createDeletedTeacherDto: CreateDeletedTeacherDto) {
     const { teacherId, deletedBy, reason, restoreAt } = createDeletedTeacherDto;
 
-    // Check if teacher exists and is not already deleted
     const teacher = await this.prismaService.teacher.findUnique({
       where: { id: teacherId },
     });
@@ -30,7 +29,6 @@ export class DeletedTeacherService {
       );
     }
 
-    // Check if admin exists and is active
     const admin = await this.prismaService.admin.findUnique({
       where: { id: deletedBy },
     });
@@ -45,7 +43,6 @@ export class DeletedTeacherService {
       );
     }
 
-    // Check if deletion record already exists for this teacher
     const existingDeletion = await this.prismaService.deletedTeacher.findFirst({
       where: { teacherId },
     });
@@ -56,9 +53,7 @@ export class DeletedTeacherService {
       );
     }
 
-    // Create deletion record and update teacher in a transaction
     const result = await this.prismaService.$transaction(async (prisma) => {
-      // Update teacher's isDeleted status
       await prisma.teacher.update({
         where: { id: teacherId },
         data: {
@@ -66,8 +61,6 @@ export class DeletedTeacherService {
           deletedAt: new Date(),
         },
       });
-
-      // Create deletion record
       const deletedTeacher = await prisma.deletedTeacher.create({
         data: {
           teacherId,
@@ -99,7 +92,6 @@ export class DeletedTeacherService {
   ) {
     const skip = (page - 1) * limit;
 
-    // Build filter conditions
     const where: any = {};
 
     if (deletedBy) {
@@ -124,10 +116,8 @@ export class DeletedTeacherService {
       }
     }
 
-    // Get total count for pagination
     const total = await this.prismaService.deletedTeacher.count({ where });
 
-    // Get deleted teachers with relations
     const deletedTeachers = await this.prismaService.deletedTeacher.findMany({
       where,
       include: {
@@ -173,7 +163,6 @@ export class DeletedTeacherService {
   }
 
   async update(id: string, updateDeletedTeacherDto: UpdateDeletedTeacherDto) {
-    // Check if deletion record exists
     const existingRecord = await this.prismaService.deletedTeacher.findUnique({
       where: { id },
     });
@@ -184,10 +173,8 @@ export class DeletedTeacherService {
       );
     }
 
-    // Note: teacherId is immutable and should not be updated
     const { teacherId, ...updateData } = updateDeletedTeacherDto as any;
 
-    // If deletedBy is being updated, verify the new admin exists
     if (updateData.deletedBy) {
       const admin = await this.prismaService.admin.findUnique({
         where: { id: updateData.deletedBy },
@@ -206,7 +193,6 @@ export class DeletedTeacherService {
       }
     }
 
-    // Convert date strings to Date objects
     if (updateData.restoreAt) {
       updateData.restoreAt = new Date(updateData.restoreAt);
     }
@@ -226,7 +212,6 @@ export class DeletedTeacherService {
   }
 
   async remove(id: string) {
-    // Check if deletion record exists
     const existingRecord = await this.prismaService.deletedTeacher.findUnique({
       where: { id },
       include: {
@@ -240,7 +225,6 @@ export class DeletedTeacherService {
       );
     }
 
-    // Check if teacher still exists
     const teacher = await this.prismaService.teacher.findUnique({
       where: { id: existingRecord.teacherId },
     });
@@ -251,7 +235,6 @@ export class DeletedTeacherService {
       );
     }
 
-    // Check if restore date has been set and hasn't passed yet
     if (existingRecord.restoreAt) {
       const now = new Date();
       if (existingRecord.restoreAt > now) {
@@ -261,9 +244,7 @@ export class DeletedTeacherService {
       }
     }
 
-    // Restore teacher and remove deletion record in a transaction
     const result = await this.prismaService.$transaction(async (prisma) => {
-      // Restore teacher's isDeleted status
       const restoredTeacher = await prisma.teacher.update({
         where: { id: existingRecord.teacherId },
         data: {
@@ -272,7 +253,6 @@ export class DeletedTeacherService {
         },
       });
 
-      // Delete the deletion record
       await prisma.deletedTeacher.delete({
         where: { id },
       });

@@ -56,7 +56,6 @@ export class TeacherController {
     return this.teacherService.create(createTeacherDto);
   }
 
-  ///////
   @UseGuards(AdminAuthGuard, RolesGuard)
   @Roles('admin')
   @Get()

@@ -63,14 +63,6 @@ export class CreateTeacherPaymentDto {
   @IsString()
   paidBy: string;
 
-  // @ApiPropertyOptional({
-  //   description: 'Payment date (ISO). Defaults to current date/time if not provided.',
-  //   example: '2024-01-15T10:30:00.000Z',
-  // })
-  // @IsOptional()
-  // @IsDateString()
-  // paidAt?: string;
-
   @ApiPropertyOptional({
     description: 'Whether the payment is canceled',
     example: false,

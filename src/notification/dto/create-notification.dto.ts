@@ -1,4 +1,3 @@
-// create-notification.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,

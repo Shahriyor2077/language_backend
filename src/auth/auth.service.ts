@@ -43,12 +43,10 @@ export class AuthService {
   ) { }
 
   async loginAdmin(dto: LoginDto, res: Response) {
-    // Check for env superadmin first
     const envUsername = process.env.SUPER_ADMIN_USERNAME;
     const envPassword = process.env.SUPER_ADMIN_PASSWORD;
 
     if (dto.username === envUsername && dto.password === envPassword) {
-      // Generate token for env superadmin
       const payload = {
         id: 'env-superadmin',
         role: 'superAdmin',
@@ -73,7 +71,7 @@ export class AuthService {
         id: 'env-superadmin',
         role: 'superAdmin',
         accessToken,
-        refreshToken, 
+        refreshToken,
       };
     }
 
@@ -534,7 +532,7 @@ export class AuthService {
     console.log('password is hashed');
 
     const otp = this.smsService.generateOtp();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 daqiqa
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
     otpStore.set(phoneNumber, { otp, expiresAt, teacherId });
 

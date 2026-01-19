@@ -42,7 +42,7 @@ import { TeacherAuthGuard } from '../common/guards/teacher-auth.guard';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('admin/login')
   @HttpCode(HttpStatus.OK)
@@ -202,14 +202,11 @@ export class AuthController {
     return this.authService.updateTeacherProfile(user.id, dto);
   }
 
-  // ==================== GOOGLE OAUTH ====================
-
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Google OAuth login - redirects to Google' })
   @ApiResponse({ status: 302, description: 'Redirects to Google OAuth' })
   async googleAuth() {
-    // Guard handles redirect to Google
   }
 
   @Get('google/callback')

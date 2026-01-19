@@ -10,13 +10,11 @@ import * as bcrypt from 'bcrypt';
 import { UpdatePasswordDto } from './dto/updatePassword.dto';
 import { unlink } from 'fs/promises';
 import { join } from 'path';
-// import sharp from 'sharp';
-// import sharp from 'sharp';
 const sharp = require('sharp');
 
 @Injectable()
 export class TeacherService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
   private readonly UPLOAD_DIR = './uploads/teachers';
   private readonly MAX_WIDTH = 800;
   private readonly MAX_HEIGHT = 800;
@@ -176,7 +174,6 @@ export class TeacherService {
     return { message: 'Password updated successfully' };
   }
 
-  // Add this method to your TeacherService class
   async uploadImage(id: string, filename: string) {
     const teacher = await this.prismaService.teacher.findUnique({
       where: { id },
@@ -188,7 +185,6 @@ export class TeacherService {
     }
 
     try {
-      // Compress and optimize the image
       const inputPath = join(this.UPLOAD_DIR, filename);
       const compressedFilename = `compressed-${Date.now()}-${filename.replace(/\.[^/.]+$/, '')}.jpg`;
       const outputPath = join(this.UPLOAD_DIR, compressedFilename);
@@ -201,10 +197,8 @@ export class TeacherService {
         .jpeg({ quality: this.QUALITY, progressive: true })
         .toFile(outputPath);
 
-      // Delete the original uncompressed file
       await this.deleteFile(inputPath);
 
-      // Delete old image if exists
       if (teacher.imageUrl) {
         await this.deleteFile(join('./', teacher.imageUrl));
       }
@@ -219,13 +213,12 @@ export class TeacherService {
         teacher: updatedTeacher,
       };
     } catch (error) {
-      // Clean up on error
       await this.deleteFile(join(this.UPLOAD_DIR, filename));
       throw error;
     }
   }
   private async deleteFile(path: string): Promise<void> {
-    await unlink(path).catch(() => {});
+    await unlink(path).catch(() => { });
   }
 
   async deleteImage(id: string) {
@@ -241,11 +234,9 @@ export class TeacherService {
       throw new BadRequestException('Teacher has no image to delete');
     }
 
-    // Delete the file
     const imagePath = join('./', teacher.imageUrl);
     await unlink(imagePath).catch(() => { });
 
-    // Update database
     const updatedTeacher = await this.prismaService.teacher.update({
       where: { id },
       data: { imageUrl: null },

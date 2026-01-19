@@ -1,4 +1,3 @@
-// dto/create-lesson.dto.ts
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
@@ -38,7 +37,6 @@ export class CreateLessonDto {
   @IsNumber()
   price: number;
 
-  // @ApiProperty({ required: false, default: false })
   @IsOptional()
   @IsBoolean()
   isPaid?: boolean;

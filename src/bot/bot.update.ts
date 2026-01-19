@@ -8,7 +8,7 @@ interface BotContext extends Context {
 
 @Update()
 export class BotUpdate {
-  constructor(private readonly botService: BotService) {}
+  constructor(private readonly botService: BotService) { }
 
   @Start()
   async onStart(@Ctx() ctx: BotContext) {
@@ -97,33 +97,33 @@ bosing yoki quyidagi buyruqlardan foydalaning:
     }
   }
 
-@Command('lessons_history')
-async onLessonHistory(@Ctx() ctx: Context) {
-  await ctx.reply('Sizning darslaringiz tarixini yuklayapman... ⏳');
+  @Command('lessons_history')
+  async onLessonHistory(@Ctx() ctx: Context) {
+    await ctx.reply('Sizning darslaringiz tarixini yuklayapman... ⏳');
 
-  const lessons = await this.botService.getStudentHistoryLessons(
-    ctx.from?.id!,
-  );
+    const lessons = await this.botService.getStudentHistoryLessons(
+      ctx.from?.id!,
+    );
 
-  if (!lessons.lessons.length) {
-    await ctx.replyWithHTML("📚 Sizda hali darslar tarixi yo'q.");
-    return;
-  }
+    if (!lessons.lessons.length) {
+      await ctx.replyWithHTML("📚 Sizda hali darslar tarixi yo'q.");
+      return;
+    }
 
-  const formatDateTime = (isoDate: Date | null) => {
-    if (!isoDate) return 'Belgilanmagan'; // Return default text if null
-    return new Date(isoDate).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+    const formatDateTime = (isoDate: Date | null) => {
+      if (!isoDate) return 'Belgilanmagan';
+      return new Date(isoDate).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    };
 
-  const message = `📚 <b>Mening darslarim tarixi:</b>\n\n${lessons.lessons
-    .map((item, index) => {
-      return `${index + 1}. <b>Dars nomi: \t${item.lesson.name}</b>
+    const message = `📚 <b>Mening darslarim tarixi:</b>\n\n${lessons.lessons
+      .map((item, index) => {
+        return `${index + 1}. <b>Dars nomi: \t${item.lesson.name}</b>
 ✅ Dars band qilingan sana :\t ${formatDateTime(item.lesson.bookedAt)}
 📅 Boshlangan vaqti:\t ${formatDateTime(item.lesson.startTime)}
 📅 Tugagan vaqti:\t ${formatDateTime(item.lesson.endTime)}
@@ -133,14 +133,14 @@ async onLessonHistory(@Ctx() ctx: Context) {
 📌 Darsga berilgan feedback:\t ${item.feedback}
 
 ───────────────`;
-    })
-    .join('\n\n')}`;
+      })
+      .join('\n\n')}`;
 
-  await ctx.replyWithHTML(message);
+    await ctx.replyWithHTML(message);
 
-  try {
-  } catch (error) {
-    console.log(error);
+    try {
+    } catch (error) {
+      console.log(error);
+    }
   }
-}
 }

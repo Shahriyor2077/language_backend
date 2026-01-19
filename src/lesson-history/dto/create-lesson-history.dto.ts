@@ -1,4 +1,3 @@
-// dto/create-lesson-history.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsUUID,

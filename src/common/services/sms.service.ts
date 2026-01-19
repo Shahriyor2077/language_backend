@@ -7,7 +7,6 @@ export class SmsService {
 
     async sendOtp(phoneNumber: string, otp: string): Promise<boolean> {
         try {
-            // +998 ni olib tashlash (Eskiz 998XXXXXXXXX formatini kutadi)
             const cleanPhone = phoneNumber.replace('+', '');
 
             const message = process.env.SMS_TEMPLATE?.replace('{otp}', otp)

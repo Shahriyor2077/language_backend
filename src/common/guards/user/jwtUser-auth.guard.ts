@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class TeacherAuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(private readonly jwtService: JwtService) { }
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -49,7 +49,7 @@ export class TeacherAuthGuard implements CanActivate {
       req.admin = payload;
       return true;
     }
-    // console.log('user token: ', token);
+
     return verify(token, this.jwtService);
   }
 }

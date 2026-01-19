@@ -15,7 +15,6 @@ export class LessonHistoryService {
 
   async create(dto: CreateLessonHistoryDto) {
     try {
-      // 1. Verify the lesson exists and hasn't been deleted
       const lesson = await this.prisma.lesson.findUnique({
         where: { id: dto.lessonId },
       });
@@ -24,7 +23,6 @@ export class LessonHistoryService {
         throw new NotFoundException('Lesson not found or has been deleted');
       }
 
-      // 2. Check if lesson has actually ended
       const now = new Date();
       if (lesson.endTime > now) {
         throw new BadRequestException(
@@ -32,21 +30,18 @@ export class LessonHistoryService {
         );
       }
 
-      // 3. Verify teacher matches the lesson
       if (lesson.teacherId !== dto.teacherId) {
         throw new BadRequestException(
           "Teacher ID does not match the lesson's assigned teacher",
         );
       }
 
-      // 4. Verify student matches the lesson
       if (lesson.studentId !== dto.studentId) {
         throw new BadRequestException(
           "Student ID does not match the lesson's assigned student",
         );
       }
 
-      // 5. Check if teacher exists and is active
       const teacher = await this.prisma.teacher.findUnique({
         where: { id: dto.teacherId },
       });
@@ -54,7 +49,6 @@ export class LessonHistoryService {
         throw new NotFoundException('Teacher not found or inactive');
       }
 
-      // 6. Check if student exists and is active
       const student = await this.prisma.student.findUnique({
         where: { id: dto.studentId },
       });
@@ -62,7 +56,6 @@ export class LessonHistoryService {
         throw new NotFoundException('Student not found or inactive');
       }
 
-      // 7. Check if history already exists for this lesson
       const existingHistory = await this.prisma.lessonHistory.findFirst({
         where: {
           lessonId: dto.lessonId,
@@ -76,17 +69,14 @@ export class LessonHistoryService {
         );
       }
 
-      // 8. Validate star rating
       if (dto.star < 1 || dto.star > 5) {
         throw new BadRequestException('Star rating must be between 1 and 5');
       }
 
-      // 9. Validate feedback length (optional but recommended)
       if (dto.feedback && dto.feedback.length > 1000) {
         throw new BadRequestException('Feedback cannot exceed 1000 characters');
       }
 
-      // 10. Create the lesson history
       const history = await this.prisma.lessonHistory.create({
         data: {
           lessonId: dto.lessonId,
@@ -358,7 +348,7 @@ export class LessonHistoryService {
       where: {
         endTime: { lte: now },
         isDeleted: false,
-        studentId: { not: { equals: null as any } }, // Only get lessons with a student assigned
+        studentId: { not: { equals: null as any } },
         lessonHistories: {
           none: { isDeleted: false },
         },
@@ -375,8 +365,8 @@ export class LessonHistoryService {
           data: {
             lessonId: lesson.id,
             teacherId: lesson.teacherId,
-            studentId: lesson.studentId as string, // Safe to cast since we filtered for non-null
-            star: 0, // Default - teacher can update later
+            studentId: lesson.studentId as string,
+            star: 0,
             feedback: 'Automatically created by system',
           },
         });

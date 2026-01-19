@@ -9,12 +9,11 @@ export class BotService {
     private readonly prismaService: PrismaService,
     private readonly lessonService: LessonService,
     private readonly histroryService: LessonHistoryService,
-  ) {}
+  ) { }
 
   async registerStudent(dto: TelegramUserDto) {
     const { tgId, firstName, lastName, tgUsername, phoneNumber } = dto;
 
-    // Create new student
     return this.prismaService.student.create({
       data: {
         tgId: tgId.toString(),

@@ -10,7 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class TeacherPaymentService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
 
   async create(createTeacherPaymentDto: CreateTeacherPaymentDto) {
     const {
@@ -28,7 +28,6 @@ export class TeacherPaymentService {
       notes,
     } = createTeacherPaymentDto;
 
-    // Check if teacher exists
     const teacher = await this.prismaService.teacher.findUnique({
       where: { id: teacherId },
     });
@@ -36,7 +35,6 @@ export class TeacherPaymentService {
       throw new NotFoundException(`Teacher with ID ${teacherId} not found`);
     }
 
-    // Check if lesson exists
     const lesson = await this.prismaService.lesson.findUnique({
       where: { id: lessonId },
     });
@@ -44,7 +42,6 @@ export class TeacherPaymentService {
       throw new NotFoundException(`Lesson with ID ${lessonId} not found`);
     }
 
-    // Check if payment already exists for this lesson
     const existingPayment = await this.prismaService.teacherPayment.findUnique({
       where: { lessonId },
     });
@@ -54,15 +51,12 @@ export class TeacherPaymentService {
       );
     }
 
-    // Prevent creating a payment that is already marked as canceled
     if (isCanceled === true) {
       throw new BadRequestException(
         'Cannot create a payment with canceled status. Create the payment first, then cancel it if needed.',
       );
     }
 
-    // Validate mathematical correctness of amounts
-    // Method 1: platformAmount + teacherAmount = totalLessonAmount
     const sumCheck = platformAmount + teacherAmount;
     if (Math.abs(sumCheck - totalLessonAmount) > 0.01) {
       throw new BadRequestException(
@@ -70,7 +64,6 @@ export class TeacherPaymentService {
       );
     }
 
-    // Method 2: Validate platformAmount calculation
     const expectedPlatformAmount =
       totalLessonAmount * (platformComission / 100);
     if (Math.abs(platformAmount - expectedPlatformAmount) > 0.01) {
@@ -79,7 +72,6 @@ export class TeacherPaymentService {
       );
     }
 
-    // Method 3: Validate teacherAmount calculation
     const expectedTeacherAmount = totalLessonAmount - platformAmount;
     if (Math.abs(teacherAmount - expectedTeacherAmount) > 0.01) {
       throw new BadRequestException(
@@ -87,7 +79,6 @@ export class TeacherPaymentService {
       );
     }
 
-    // Create the payment
     const payment = await this.prismaService.teacherPayment.create({
       data: {
         teacherId,
@@ -126,7 +117,6 @@ export class TeacherPaymentService {
   ) {
     const skip = (page - 1) * limit;
 
-    // Build filter conditions
     const where: any = {
       isDeleted: false,
     };
@@ -149,7 +139,6 @@ export class TeacherPaymentService {
       }
     }
 
-    // Get total count for pagination
     const total = await this.prismaService.teacherPayment.count({ where });
 
     const payments = await this.prismaService.teacherPayment.findMany({
@@ -195,7 +184,6 @@ export class TeacherPaymentService {
       },
       include: {
         teacher: true,
-        // lesson: true,
       },
     });
 
@@ -210,7 +198,6 @@ export class TeacherPaymentService {
   }
 
   async update(id: string, updateTeacherPaymentDto: UpdateTeacherPaymentDto) {
-    // Check if payment exists
     const existingPayment = await this.prismaService.teacherPayment.findFirst({
       where: {
         id,
@@ -222,16 +209,13 @@ export class TeacherPaymentService {
       throw new NotFoundException(`Teacher payment with ID ${id} not found`);
     }
 
-    // Prevent updating canceled payments
     if (existingPayment.isCanceled) {
       throw new BadRequestException('Cannot update a canceled payment');
     }
 
-    // Note: teacherId and lessonId are immutable and should not be updated
     const { teacherId, lessonId, ...updateData } =
       updateTeacherPaymentDto as any;
 
-    // If amounts are being updated, validate mathematical correctness
     const newPlatformAmount =
       updateData.platformAmount ?? existingPayment.platformAmount;
     const newTeacherAmount =
@@ -245,7 +229,6 @@ export class TeacherPaymentService {
       );
     }
 
-    // Convert date strings to Date objects
     if (updateData.paidAt) {
       updateData.paidAt = new Date(updateData.paidAt);
     }
@@ -269,7 +252,6 @@ export class TeacherPaymentService {
   }
 
   async remove(id: string) {
-    // Check if payment exists
     const existingPayment = await this.prismaService.teacherPayment.findFirst({
       where: {
         id,
@@ -281,7 +263,6 @@ export class TeacherPaymentService {
       throw new NotFoundException(`Teacher payment with ID ${id} not found`);
     }
 
-    // Soft delete
     const payment = await this.prismaService.teacherPayment.update({
       where: { id },
       data: {
