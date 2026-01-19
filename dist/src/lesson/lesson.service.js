@@ -1,0 +1,361 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.LessonService = void 0;
+const common_1 = require("@nestjs/common");
+const prisma_service_1 = require("../prisma/prisma.service");
+const googleapis_1 = require("googleapis");
+let LessonService = class LessonService {
+    prisma;
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
+    async generateGoogleMeetLink(teacher, startTime, endTime, lessonName) {
+        const oauth2Client = new googleapis_1.google.auth.OAuth2(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_SECRET);
+        oauth2Client.setCredentials({
+            access_token: teacher.googleAccessToken,
+            refresh_token: teacher.googleRefreshToken,
+        });
+        const calendar = googleapis_1.google.calendar({ version: 'v3', auth: oauth2Client });
+        const event = {
+            summary: lessonName,
+            description: `Lesson managed by your platform`,
+            start: { dateTime: startTime.toISOString() },
+            end: { dateTime: endTime.toISOString() },
+            conferenceData: {
+                createRequest: {
+                    requestId: `lesson-${Date.now()}`,
+                    conferenceSolutionKey: { type: 'hangoutsMeet' },
+                },
+            },
+        };
+        try {
+            const response = await calendar.events.insert({
+                calendarId: 'primary',
+                requestBody: event,
+                conferenceDataVersion: 1,
+            });
+            return {
+                hangoutLink: response.data.hangoutLink,
+                eventId: response.data.id,
+            };
+        }
+        catch (error) {
+            console.error('Google Calendar API Error:', error);
+            throw new common_1.InternalServerErrorException('Failed to create Google Meet link');
+        }
+    }
+    async create(dto) {
+        try {
+            const startTime = new Date(dto.startTime);
+            const endTime = new Date(dto.endTime);
+            const now = new Date();
+            if (startTime.getTime() <= now.getTime()) {
+                throw new common_1.BadRequestException(`Start time must be in the future. Current time: ${now.toISOString()}, Your start time: ${startTime.toISOString()}`);
+            }
+            if (endTime.getTime() <= now.getTime()) {
+                throw new common_1.BadRequestException(`End time must be in the future. Current time: ${now.toISOString()}, Your end time: ${endTime.toISOString()}`);
+            }
+            if (startTime >= endTime) {
+                throw new common_1.BadRequestException('Start time must be before end time');
+            }
+            const findTeacher = await this.prisma.teacher.findUnique({
+                where: { id: dto.teacherId },
+            });
+            if (!findTeacher) {
+                throw new common_1.NotFoundException('Teacher not found');
+            }
+            const durationMs = endTime.getTime() - startTime.getTime();
+            const durationMinutes = durationMs / (1000 * 60);
+            const ALLOWED_DURATIONS_MINUTES = [30, 45, 60, 90, 120];
+            if (!ALLOWED_DURATIONS_MINUTES.includes(durationMinutes)) {
+                throw new common_1.BadRequestException(`Invalid lesson duration. Allowed durations: ${ALLOWED_DURATIONS_MINUTES.join(', ')} minutes`);
+            }
+            const teacher = await this.prisma.teacher.findUnique({
+                where: { id: dto.teacherId },
+            });
+            if (!teacher)
+                throw new common_1.NotFoundException('Teacher not found');
+            if (!teacher.googleAccessToken) {
+                throw new common_1.BadRequestException('Teacher must connect Google account to create lessons');
+            }
+            const BREAK_TIME_MINUTES = 15;
+            const endTimeWithBreak = new Date(endTime.getTime() + BREAK_TIME_MINUTES * 60 * 1000);
+            const teacherBusy = await this.prisma.lesson.findFirst({
+                where: {
+                    teacherId: dto.teacherId,
+                    isDeleted: false,
+                    OR: [
+                        {
+                            startTime: { lt: endTime },
+                            endTime: { gt: startTime },
+                        },
+                        {
+                            startTime: { lt: endTimeWithBreak },
+                            endTime: { gt: startTime },
+                        },
+                    ],
+                },
+            });
+            if (teacherBusy) {
+                throw new common_1.BadRequestException('Teacher is busy at this time or within the 15-minute break period');
+            }
+            const previousTeacherLesson = await this.prisma.lesson.findFirst({
+                where: {
+                    teacherId: dto.teacherId,
+                    isDeleted: false,
+                    endTime: {
+                        gt: new Date(startTime.getTime() - BREAK_TIME_MINUTES * 60 * 1000),
+                        lte: startTime,
+                    },
+                },
+            });
+            if (previousTeacherLesson) {
+                throw new common_1.BadRequestException('Teacher needs a 15-minute break after the previous lesson');
+            }
+            const studentBusy = await this.prisma.lesson.findFirst({
+                where: {
+                    studentId: dto.studentId,
+                    isDeleted: false,
+                    startTime: { lt: endTime },
+                    endTime: { gt: startTime },
+                },
+            });
+            if (studentBusy) {
+                throw new common_1.BadRequestException('Student already has a lesson at this time');
+            }
+            const generatedMeetsUrl = await this.generateGoogleMeetLink(teacher, startTime, endTime, dto.name);
+            const lesson = await this.prisma.lesson.create({
+                data: {
+                    name: dto.name,
+                    startTime,
+                    endTime,
+                    teacherId: dto.teacherId,
+                    studentId: null,
+                    googleMeetsUrl: generatedMeetsUrl.hangoutLink,
+                    googleEventId: generatedMeetsUrl.eventId,
+                    price: dto.price,
+                    isPaid: dto.isPaid ?? false,
+                },
+            });
+            return {
+                message: 'Lesson created successfully',
+                lesson,
+            };
+        }
+        catch (error) {
+            if (error instanceof common_1.BadRequestException ||
+                error instanceof common_1.NotFoundException) {
+                throw error;
+            }
+            console.log(error);
+            throw new common_1.InternalServerErrorException('Lesson creation failed');
+        }
+    }
+    async findAll() {
+        try {
+            const [lessons, count] = await this.prisma.$transaction([
+                this.prisma.lesson.findMany({
+                    where: { isDeleted: false },
+                    include: {
+                        teacher: true,
+                        student: true,
+                    },
+                    orderBy: { createdAt: 'desc' },
+                }),
+                this.prisma.lesson.count({
+                    where: { isDeleted: false },
+                }),
+            ]);
+            return {
+                statusCode: 200,
+                message: 'Lessons retrieved successfully',
+                count,
+                lessons: lessons || [],
+            };
+        }
+        catch (error) {
+            if (error instanceof common_1.NotFoundException) {
+                throw error;
+            }
+            throw new common_1.InternalServerErrorException('Lessons retrieval failed');
+        }
+    }
+    async findOne(id) {
+        try {
+            const lesson = await this.prisma.lesson.findFirst({
+                where: { id, isDeleted: false },
+                include: {
+                    teacher: true,
+                    student: true,
+                },
+            });
+            if (!lesson) {
+                throw new common_1.NotFoundException('Lesson not found');
+            }
+            return {
+                statusCode: 200,
+                message: 'Lesson retrieved successfully',
+                lesson,
+            };
+        }
+        catch (error) {
+            if (error instanceof common_1.NotFoundException) {
+                throw error;
+            }
+            throw new common_1.InternalServerErrorException('Lesson retrieval failed');
+        }
+    }
+    async update(id, dto) {
+        try {
+            const existingLesson = await this.prisma.lesson.findFirst({
+                where: { id, isDeleted: false },
+            });
+            if (!existingLesson) {
+                throw new common_1.NotFoundException('Lesson not found');
+            }
+            const startTime = dto.startTime
+                ? new Date(dto.startTime)
+                : existingLesson.startTime;
+            const endTime = dto.endTime
+                ? new Date(dto.endTime)
+                : existingLesson.endTime;
+            if (startTime >= endTime) {
+                throw new common_1.BadRequestException('Start time must be before end time');
+            }
+            const teacherId = dto.teacherId ?? existingLesson.teacherId;
+            const studentId = dto.studentId ?? existingLesson.studentId;
+            const teacherBusy = await this.prisma.lesson.findFirst({
+                where: {
+                    id: { not: id },
+                    teacherId,
+                    isDeleted: false,
+                    startTime: { lt: endTime },
+                    endTime: { gt: startTime },
+                },
+            });
+            if (teacherBusy) {
+                throw new common_1.BadRequestException('Teacher is busy at this time');
+            }
+            const studentBusy = await this.prisma.lesson.findFirst({
+                where: {
+                    id: { not: id },
+                    studentId,
+                    isDeleted: false,
+                    startTime: { lt: endTime },
+                    endTime: { gt: startTime },
+                },
+            });
+            if (studentBusy) {
+                throw new common_1.BadRequestException('Student already has a lesson at this time');
+            }
+            if (dto.googleMeetsUrl &&
+                dto.googleMeetsUrl !== existingLesson.googleMeetsUrl) {
+                const urlExists = await this.prisma.lesson.findUnique({
+                    where: { googleMeetsUrl: dto.googleMeetsUrl },
+                });
+                if (urlExists) {
+                    throw new common_1.BadRequestException('Google Meets URL already exists');
+                }
+            }
+            const updatedLesson = await this.prisma.lesson.update({
+                where: { id },
+                data: {
+                    ...dto,
+                    startTime,
+                    endTime,
+                },
+            });
+            return {
+                message: 'Lesson updated successfully',
+                lesson: updatedLesson,
+            };
+        }
+        catch (error) {
+            if (error instanceof common_1.BadRequestException ||
+                error instanceof common_1.NotFoundException) {
+                throw error;
+            }
+            console.log(error);
+            throw new common_1.BadRequestException('Lesson update failed');
+        }
+    }
+    async remove(id) {
+        try {
+            const lesson = await this.prisma.lesson.findFirst({
+                where: { id, isDeleted: false },
+            });
+            if (!lesson) {
+                throw new common_1.NotFoundException('Lesson not found or already deleted');
+            }
+            if (lesson.startTime <= new Date()) {
+                throw new common_1.BadRequestException('Started lesson cannot be deleted');
+            }
+            const deletedLesson = await this.prisma.lesson.update({
+                where: { id },
+                data: {
+                    isDeleted: true,
+                    deletedAt: new Date(),
+                },
+            });
+            return {
+                message: 'Lesson deleted successfully',
+                lesson: deletedLesson,
+            };
+        }
+        catch (error) {
+            if (error instanceof common_1.BadRequestException ||
+                error instanceof common_1.NotFoundException) {
+                throw error;
+            }
+            throw new common_1.BadRequestException('Lesson deletion failed');
+        }
+    }
+    async findAllbyStudent(studentId) {
+        const lessons = await this.prisma.lesson.findMany({
+            where: { studentId, isDeleted: false },
+            include: {
+                teacher: true,
+            },
+        });
+        if (!lessons.length) {
+            return {
+                message: 'No lessons found for this student',
+                lessons: [],
+            };
+        }
+        return {
+            message: 'Lessons retrieved successfully',
+            lessons,
+        };
+    }
+    async findAllbyTeacher(teacherId) {
+        const lessons = await this.prisma.lesson.findMany({
+            where: { teacherId, isDeleted: false },
+        });
+        if (!lessons.length) {
+            return {
+                message: 'No lessons found for this teacher',
+                lessons: [],
+            };
+        }
+        return {
+            message: 'Lessons retrieved successfully',
+            lessons,
+        };
+    }
+};
+exports.LessonService = LessonService;
+exports.LessonService = LessonService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+], LessonService);
+//# sourceMappingURL=lesson.service.js.map
